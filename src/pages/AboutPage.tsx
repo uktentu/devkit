@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, ExternalLink, Sparkles, Gamepad2, Maximize2 } from 'lucide-react';
+import profileImage from '/profile.png';
 
 interface AboutPageProps {
     onStartGame?: () => void;
@@ -26,7 +27,7 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
         title: "Full Stack Developer",
         bio: "Passionate developer creating tools that make developers' lives easier. I love building intuitive applications with modern web technologies.",
         // Replace with your actual image URL or import a local image
-        imageUrl: "/profile.png", // Converted from HEIC to PNG for better quality
+        imageUrl: profileImage, // Imported from public folder - Vite handles base path automatically
         initials: "TUK", // Used when imageUrl is empty
         email: "uday.kiran.tentu@citi.com",
         teamsUrl: "https://teams.microsoft.com/l/chat/0/0?users=uday.kiran.tentu@citi.com",

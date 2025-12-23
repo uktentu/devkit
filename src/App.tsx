@@ -408,13 +408,26 @@ function ComparePage({
   const handleExpandAll = useCallback(() => setCollapsedPaths(new Set()), [setCollapsedPaths]);
 
   const handleCollapseAll = useCallback(() => {
-    // We can't easily know all paths without traversing.
-    // For now, let's just clear (expand all) or we need a way to find all paths.
-    // Actually, Collapse All usually means "collapse top level" or "collapse everything".
-    // Since default is expanded, adding root keys to collapsedPaths would collapse them.
-    // Simplifying: Just reset for now or implement recursive path finding.
-    setCollapsedPaths(new Set()); // Reset to expanded state as default
-  }, [setCollapsedPaths]);
+    if (!diffResult) return;
+
+    // Collapse top-level nodes (depth 1) which will hide their nested children
+    // This shows the main structure but hides the details
+    const topLevelPaths = new Set<string>();
+
+    diffResult.leftLines.forEach(line => {
+      if (line.isCollapsible && line.path && line.depth === 1) {
+        topLevelPaths.add(line.path);
+      }
+    });
+
+    diffResult.rightLines.forEach(line => {
+      if (line.isCollapsible && line.path && line.depth === 1) {
+        topLevelPaths.add(line.path);
+      }
+    });
+
+    setCollapsedPaths(topLevelPaths);
+  }, [diffResult, setCollapsedPaths]);
 
   const filteredLines = useMemo(() => {
     if (!diffResult) return { leftLines: [], rightLines: [] };
