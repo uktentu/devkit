@@ -30,7 +30,7 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
         imageUrl: profileImage, // Imported from public folder - Vite handles base path automatically
         initials: "TUK", // Used when imageUrl is empty
         email: "firfirfas@duck.com",
-        teamsUrl: "https://buymeacoffee.com/uktentuo",
+        teamsUrl: "https://buymeachai.ezee.li/uktentu",
     };
     // ============================================
 
@@ -144,7 +144,7 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
                     className={`flex gap-4 transition-all duration-700 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
                 >
-                    {/* Buy Me a Coffee Link */}
+                    {/* Buy Me a Chai Link */}
                     <a
                         href={developerInfo.teamsUrl}
                         target="_blank"
@@ -152,7 +152,7 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
                         className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300 hover:scale-105"
                     >
                         <Coffee size={20} />
-                        <span>Buy Me a Coffee</span>
+                        <span>Buy Me a Chai</span>
                         <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                     </a>
 
@@ -251,7 +251,7 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
                                     className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-medium transition-all hover:shadow-lg hover:shadow-yellow-500/25 active:scale-95"
                                 >
                                     <Coffee size={18} />
-                                    <span>Buy Me a Coffee</span>
+                                    <span>Buy Me a Chai</span>
                                 </a>
                                 <a
                                     href={`mailto:${developerInfo.email}`}
