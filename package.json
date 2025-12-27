@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "vite build && gh-pages -d dist -b release"
+    "deploy": "vite build && gh-pages -d dist -b release_alpha"
   },
   "dependencies": {
     "@types/lodash": "^4.17.21",
