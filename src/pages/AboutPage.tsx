@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, MessageSquare, ExternalLink, Sparkles, Gamepad2, Maximize2 } from 'lucide-react';
+import { Mail, Coffee, ExternalLink, Sparkles, Gamepad2, Maximize2 } from 'lucide-react';
 import profileImage from '/profile.png';
 
 interface AboutPageProps {
@@ -29,8 +29,8 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
         // Replace with your actual image URL or import a local image
         imageUrl: profileImage, // Imported from public folder - Vite handles base path automatically
         initials: "TUK", // Used when imageUrl is empty
-        email: "uday.kiran.tentu@citi.com",
-        teamsUrl: "https://teams.microsoft.com/l/chat/0/0?users=uday.kiran.tentu@citi.com",
+        email: "firfirfas@duck.com",
+        teamsUrl: "https://buymeacoffee.com/uktentuo",
     };
     // ============================================
 
@@ -144,15 +144,15 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
                     className={`flex gap-4 transition-all duration-700 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
                 >
-                    {/* Teams Link */}
+                    {/* Buy Me a Coffee Link */}
                     <a
                         href={developerInfo.teamsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105"
+                        className="group flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300 hover:scale-105"
                     >
-                        <MessageSquare size={20} />
-                        <span>Teams</span>
+                        <Coffee size={20} />
+                        <span>Buy Me a Coffee</span>
                         <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                     </a>
 
@@ -248,10 +248,10 @@ export default function AboutPage({ onStartGame }: AboutPageProps) {
                                     href={developerInfo.teamsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-medium transition-all hover:shadow-lg hover:shadow-blue-500/25 active:scale-95"
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-medium transition-all hover:shadow-lg hover:shadow-yellow-500/25 active:scale-95"
                                 >
-                                    <MessageSquare size={18} />
-                                    <span>Chat on Teams</span>
+                                    <Coffee size={18} />
+                                    <span>Buy Me a Coffee</span>
                                 </a>
                                 <a
                                     href={`mailto:${developerInfo.email}`}
