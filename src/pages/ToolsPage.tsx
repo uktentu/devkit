@@ -248,42 +248,63 @@ console.log(hello);
 `);
 
     const renderMarkdown = (md: string): string => {
+        // Process markdown while preserving HTML
+        // We process line by line to better handle mixed content
         let html = md
-            // Escape HTML
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            // Code blocks
+            // Code blocks (must be first to protect code content)
             .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-slate-800 text-slate-100 p-3 rounded-lg overflow-x-auto my-2"><code>$2</code></pre>')
             // Inline code
             .replace(/`([^`]+)`/g, '<code class="bg-slate-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600">$1</code>')
-            // Headers
+            // Headers (only if line starts with # and not inside HTML)
             .replace(/^### (.+)$/gm, '<h3 class="text-lg font-bold mt-4 mb-2 text-slate-800">$1</h3>')
             .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-5 mb-2 text-slate-800">$1</h2>')
             .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-6 mb-3 text-slate-900">$1</h1>')
             // Bold and Italic
             .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold">$1</strong>')
             .replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
+            // Links (including image links like [![alt](img)](url))
+            .replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g, '<a href="$3" target="_blank"><img src="$2" alt="$1" class="inline-block" /></a>')
+            // Images
+            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto my-2" />')
             // Links
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank">$1</a>')
-            // Blockquotes
+            // Blockquotes  
             .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-slate-300 pl-4 py-1 my-2 text-slate-600 italic">$1</blockquote>')
             // Lists
             .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+            // Horizontal rules
+            .replace(/^---$/gm, '<hr class="my-4 border-slate-300" />')
             // Tables (simple)
             .replace(/\|(.+)\|/g, (match) => {
                 const cells = match.split('|').filter(c => c.trim()).map(c => c.trim());
-                if (cells.every(c => /^-+$/.test(c))) return '';
+                if (cells.every(c => /^-+$/.test(c))) return ''; // This is the separator line
                 return '<tr>' + cells.map(c => `<td class="border border-slate-200 px-3 py-1">${c}</td>`).join('') + '</tr>';
-            })
-            // Paragraphs
-            .replace(/\n\n/g, '</p><p class="my-2">')
-            .replace(/\n/g, '<br/>');
+            });
 
         // Wrap tables
         html = html.replace(/(<tr>[\s\S]*?<\/tr>)+/g, '<table class="border-collapse border border-slate-200 my-3">$&</table>');
 
-        return `<p class="my-2">${html}</p>`;
+        // Convert width/height attributes on images to inline styles for proper rendering
+        html = html.replace(/<img([^>]*?)>/gi, (_, attrs) => {
+            let style = '';
+            const widthMatch = attrs.match(/width=["']?(\d+)["']?/i);
+            const heightMatch = attrs.match(/height=["']?(\d+)["']?/i);
+
+            if (widthMatch) style += `width: ${widthMatch[1]}px; `;
+            if (heightMatch) style += `height: ${heightMatch[1]}px; `;
+
+            if (style) {
+                // Check if there's already a style attribute
+                if (attrs.includes('style=')) {
+                    attrs = attrs.replace(/style=["']([^"']*)["']/i, `style="${style}$1"`);
+                } else {
+                    attrs += ` style="${style.trim()}"`;
+                }
+            }
+            return `<img${attrs}>`;
+        });
+
+        return `<div class="markdown-preview">${html}</div>`;
     };
 
     const renderedHtml = useMemo(() => renderMarkdown(markdown), [markdown]);
@@ -309,9 +330,40 @@ console.log(hello);
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Preview</span>
                 </div>
                 <div
-                    className="flex-1 p-4 overflow-auto prose prose-sm max-w-none"
+                    className="flex-1 p-4 overflow-auto prose prose-sm max-w-none markdown-preview-container"
                     dangerouslySetInnerHTML={{ __html: renderedHtml }}
                 />
+                <style>{`
+                    .markdown-preview-container img {
+                        display: inline-block !important;
+                        max-width: 100%;
+                        height: auto;
+                    }
+                    .markdown-preview-container img[width] {
+                        width: attr(width px);
+                    }
+                    .markdown-preview-container img[height] {
+                        height: attr(height px);
+                    }
+                    .markdown-preview-container p[align="center"],
+                    .markdown-preview-container div[align="center"],
+                    .markdown-preview-container h1[align="center"],
+                    .markdown-preview-container h2[align="center"] {
+                        text-align: center !important;
+                    }
+                    .markdown-preview-container p[align="left"],
+                    .markdown-preview-container div[align="left"] {
+                        text-align: left !important;
+                    }
+                    .markdown-preview-container a {
+                        display: inline-block;
+                    }
+                    .markdown-preview-container p > a,
+                    .markdown-preview-container p > img {
+                        display: inline-block;
+                        vertical-align: middle;
+                    }
+                `}</style>
             </div>
         </div>
     );
