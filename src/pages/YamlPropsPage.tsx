@@ -263,97 +263,97 @@ logging.level.org.springframework=DEBUG`);
     return (
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
             {/* Toolbar */}
-            <div className="flex-shrink-0 border-b border-slate-200 px-6 py-3 flex items-center gap-4 bg-slate-50">
+            <div className="flex-shrink-0 border-b border-slate-200 px-4 md:px-6 py-3 flex flex-wrap items-center gap-3 md:gap-4 bg-slate-50">
                 <div className="flex items-center gap-2">
                     <Settings size={18} className="text-slate-500" />
-                    <span className="font-medium text-slate-700">YAML ↔ Properties</span>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Spring Boot</span>
+                    <span className="font-medium text-slate-700 text-sm md:text-base">YAML ↔ Props</span>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium hidden sm:inline">Spring Boot</span>
                 </div>
 
-                <div className="flex-1" />
+                <div className="flex-1 min-w-0" />
 
                 {/* Mode Toggle */}
                 <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 p-1">
                     <button
                         onClick={() => setMode('yaml-to-props')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${mode === 'yaml-to-props'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-600 hover:bg-slate-100'
+                        className={`flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${mode === 'yaml-to-props'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-slate-600 hover:bg-slate-100'
                             }`}
                     >
-                        YAML → .properties
+                        YAML → <span className="hidden sm:inline">.props</span>
                     </button>
                     <button
                         onClick={() => setMode('props-to-yaml')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${mode === 'props-to-yaml'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-600 hover:bg-slate-100'
+                        className={`flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${mode === 'props-to-yaml'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-slate-600 hover:bg-slate-100'
                             }`}
                     >
-                        .properties → YAML
+                        <span className="hidden sm:inline">.props →</span> YAML
                     </button>
                 </div>
 
                 <button
                     onClick={swapValues}
                     disabled={!result.success || !result.value}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40"
+                    className="flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40"
                 >
-                    <ArrowLeftRight size={14} /> Swap
+                    <ArrowLeftRight size={14} /> <span className="hidden sm:inline">Swap</span>
                 </button>
 
                 <button
                     onClick={clear}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    className="flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                 >
-                    <Trash2 size={14} /> Clear
+                    <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
                 </button>
             </div>
 
             {/* Samples */}
-            <div className="flex-shrink-0 border-b border-slate-100 px-6 py-2 bg-slate-50/50 flex items-center gap-2 text-xs">
-                <span className="text-slate-500">Load sample:</span>
-                <button onClick={loadSampleYaml} className="text-blue-600 hover:underline">application.yml</button>
+            <div className="flex-shrink-0 border-b border-slate-100 px-4 md:px-6 py-2 bg-slate-50/50 flex items-center gap-2 text-xs">
+                <span className="text-slate-500">Sample:</span>
+                <button onClick={loadSampleYaml} className="text-blue-600 hover:underline">.yml</button>
                 <span className="text-slate-300">|</span>
-                <button onClick={loadSampleProps} className="text-blue-600 hover:underline">application.properties</button>
+                <button onClick={loadSampleProps} className="text-blue-600 hover:underline">.properties</button>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Input Panel */}
-                <div className="w-1/2 flex flex-col border-r border-slate-200">
+                <div className="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 min-h-[150px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <FileText size={14} className="text-slate-400" />
                             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                {mode === 'yaml-to-props' ? 'application.yml' : 'application.properties'}
+                                {mode === 'yaml-to-props' ? '.yml' : '.properties'}
                             </span>
                         </div>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-slate-400 hidden sm:inline">
                             {input.split('\n').length} lines
                         </span>
                     </div>
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        className="flex-1 w-full p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
+                        className="flex-1 w-full p-3 md:p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
                         spellCheck={false}
                         placeholder={mode === 'yaml-to-props' ? 'Enter YAML...' : 'Enter properties...'}
                     />
                 </div>
 
                 {/* Output Panel */}
-                <div className="w-1/2 flex flex-col">
+                <div className="w-full md:w-1/2 flex flex-col min-h-[150px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <FileText size={14} className="text-slate-400" />
                             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                {mode === 'yaml-to-props' ? 'application.properties' : 'application.yml'}
+                                {mode === 'yaml-to-props' ? '.properties' : '.yml'}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
                             {result.success && (
-                                <span className="text-xs text-slate-400">
+                                <span className="text-xs text-slate-400 hidden sm:inline">
                                     {result.value.split('\n').filter(l => l.trim()).length} lines
                                 </span>
                             )}
@@ -370,7 +370,7 @@ logging.level.org.springframework=DEBUG`);
 
                     {/* Output Content */}
                     {result.success ? (
-                        <div className="flex-1 overflow-auto p-4 bg-slate-50">
+                        <div className="flex-1 overflow-auto p-3 md:p-4 bg-slate-50">
                             {result.value ? (
                                 <pre className="font-mono text-sm whitespace-pre text-slate-700">
                                     {result.value}
@@ -392,8 +392,8 @@ logging.level.org.springframework=DEBUG`);
             </div>
 
             {/* Info Footer */}
-            <div className="flex-shrink-0 border-t border-slate-200 px-6 py-2 bg-slate-50 text-xs text-slate-500">
-                <span className="font-medium">Tip:</span> Supports nested properties, arrays, and common Spring Boot configuration patterns.
+            <div className="flex-shrink-0 border-t border-slate-200 px-4 md:px-6 py-2 bg-slate-50 text-xs text-slate-500">
+                <span className="font-medium">Tip:</span> Supports Spring Boot configuration patterns.
             </div>
         </div>
     );

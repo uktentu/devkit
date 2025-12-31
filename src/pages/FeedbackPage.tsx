@@ -35,13 +35,13 @@ export default function FeedbackPage() {
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
 
                     {/* Type Selection */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <button
                             type="button"
                             onClick={() => setType('feedback')}
                             className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${type === 'feedback'
-                                    ? 'border-blue-500 bg-blue-50 text-blue-600'
-                                    : 'border-slate-200 hover:border-blue-200 text-slate-500'
+                                ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                : 'border-slate-200 hover:border-blue-200 text-slate-500'
                                 }`}
                         >
                             <MessageSquare size={24} />
@@ -51,8 +51,8 @@ export default function FeedbackPage() {
                             type="button"
                             onClick={() => setType('feature')}
                             className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${type === 'feature'
-                                    ? 'border-green-500 bg-green-50 text-green-600'
-                                    : 'border-slate-200 hover:border-green-200 text-slate-500'
+                                ? 'border-green-500 bg-green-50 text-green-600'
+                                : 'border-slate-200 hover:border-green-200 text-slate-500'
                                 }`}
                         >
                             <Lightbulb size={24} />
@@ -62,8 +62,8 @@ export default function FeedbackPage() {
                             type="button"
                             onClick={() => setType('bug')}
                             className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${type === 'bug'
-                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                    : 'border-slate-200 hover:border-red-200 text-slate-500'
+                                ? 'border-red-500 bg-red-50 text-red-600'
+                                : 'border-slate-200 hover:border-red-200 text-slate-500'
                                 }`}
                         >
                             <Bug size={24} />

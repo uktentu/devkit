@@ -392,56 +392,57 @@ export default function JsonFormatterPage({ initialJson }: JsonFormatterPageProp
     return (
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
             {/* Toolbar */}
-            <div className="flex-shrink-0 border-b border-slate-200 px-4 py-2 flex items-center bg-slate-50">
+            <div className="flex-shrink-0 border-b border-slate-200 px-4 md:px-6 py-2 flex flex-wrap items-center gap-2 md:gap-4 bg-slate-50">
                 {/* Left actions */}
                 <div className="flex items-center gap-2">
                     <button
                         onClick={formatInput}
                         disabled={!parsed.success}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-40"
+                        title="Prettify JSON"
                     >
-                        <Code2 size={14} /> Prettify
+                        <Code2 size={14} /> <span className="hidden sm:inline">Prettify</span>
                     </button>
                     <button
                         onClick={minifyInput}
                         disabled={!parsed.success}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-40"
+                        className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-40"
+                        title="Minify JSON"
                     >
-                        <Minus size={14} /> Minify
+                        <Minus size={14} /> <span className="hidden sm:inline">Minify</span>
                     </button>
                     <button
                         onClick={clearInput}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Clear Input"
                     >
-                        <Trash2 size={14} /> Clear
+                        <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
                     </button>
                 </div>
 
                 {/* Spacer */}
-                <div className="grow-[2]" />
+                <div className="flex-1 min-w-0" />
 
                 {/* View Mode Tabs - centered */}
-                <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 p-1">
+                <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 p-1 overflow-x-auto max-w-full no-scrollbar">
                     {viewModes.map(mode => (
                         <button
                             key={mode.id}
                             onClick={() => setViewMode(mode.id)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${viewMode === mode.id
+                            className={`flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors whitespace-nowrap ${viewMode === mode.id
                                 ? 'bg-blue-600 text-white'
                                 : 'text-slate-600 hover:bg-slate-100'
                                 }`}
+                            title={mode.label}
                         >
                             {mode.icon}
-                            <span className="hidden sm:inline">{mode.label}</span>
+                            <span className="hidden lg:inline">{mode.label}</span>
                         </button>
                     ))}
                 </div>
 
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* Right actions - always same width */}
-                <div className="flex items-center gap-2 w-[140px] justify-end">
+                {/* Right actions */}
+                <div className="flex items-center gap-2 justify-end hidden md:flex">
                     <button
                         onClick={expandAll}
                         disabled={viewMode !== 'tree' && viewMode !== 'node'}
@@ -474,26 +475,26 @@ export default function JsonFormatterPage({ initialJson }: JsonFormatterPageProp
             )}
 
             {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Input Panel */}
-                <div className="w-1/2 flex flex-col border-r border-slate-200">
+                <div className="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 min-h-[200px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Input JSON</span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-slate-400 hidden sm:inline">
                             {parsed.success ? `✓ Valid JSON` : 'Paste your JSON here'}
                         </span>
                     </div>
                     <textarea
                         value={jsonInput}
                         onChange={(e) => setJsonInput(e.target.value)}
-                        className="flex-1 w-full p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
+                        className="flex-1 w-full p-3 md:p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
                         spellCheck={false}
                         placeholder='{"key": "value"}'
                     />
                 </div>
 
                 {/* Output Panel */}
-                <div className="w-1/2 flex flex-col">
+                <div className="w-full md:w-1/2 flex flex-col min-h-[200px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                             {viewMode === 'formatted' ? 'Formatted Output' :
@@ -551,9 +552,9 @@ export default function JsonFormatterPage({ initialJson }: JsonFormatterPageProp
                     )}
 
                     {viewMode === 'node' && (
-                        <div className="flex-1 flex overflow-hidden">
+                        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                             {/* Tree sidebar */}
-                            <div className="w-1/2 border-r border-slate-200 overflow-auto py-2">
+                            <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-200 overflow-auto py-2 h-1/2 md:h-full">
                                 {parsed.success && tree && (
                                     <TreeNodeComponent
                                         node={tree}
@@ -565,7 +566,9 @@ export default function JsonFormatterPage({ initialJson }: JsonFormatterPageProp
                                 )}
                             </div>
                             {/* Node details */}
-                            <NodeView node={selectedNode} json={parsed.data} />
+                            <div className="w-full md:w-1/2 h-1/2 md:h-full overflow-auto">
+                                <NodeView node={selectedNode} json={parsed.data} />
+                            </div>
                         </div>
                     )}
 

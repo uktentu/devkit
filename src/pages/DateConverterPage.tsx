@@ -121,22 +121,22 @@ export default function DateConverterPage() {
     return (
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
             {/* Toolbar */}
-            <div className="flex-shrink-0 border-b border-slate-200 px-6 py-3 flex items-center gap-4 bg-slate-50">
+            <div className="flex-shrink-0 border-b border-slate-200 px-4 md:px-6 py-3 flex items-center gap-3 md:gap-4 bg-slate-50">
                 <div className="flex items-center gap-2">
                     <Calendar size={18} className="text-slate-500" />
-                    <span className="font-medium text-slate-700">Date & Time Converter</span>
+                    <span className="font-medium text-slate-700 text-sm md:text-base">Date & Time Helper</span>
                 </div>
                 <div className="flex-1" />
                 <button
                     onClick={setNow}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 >
                     <Clock size={14} /> Now
                 </button>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-4 md:p-6">
                 <div className="max-w-2xl mx-auto space-y-6">
                     {/* Input Section */}
                     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
@@ -146,14 +146,14 @@ export default function DateConverterPage() {
                         </div>
 
                         {/* Input Type Selector */}
-                        <div className="flex gap-2 mb-4">
+                        <div className="flex flex-wrap gap-2 mb-4">
                             {inputTypes.map(type => (
                                 <button
                                     key={type.id}
                                     onClick={() => setInputType(type.id)}
                                     className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${inputType === type.id
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                         }`}
                                 >
                                     {type.label}
@@ -168,7 +168,7 @@ export default function DateConverterPage() {
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder={inputTypes.find(t => t.id === inputType)?.placeholder}
-                                className="w-full px-4 py-3 font-mono text-lg bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                className="w-full px-4 py-3 font-mono text-base md:text-lg bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             />
                             {inputValue && (
                                 <button

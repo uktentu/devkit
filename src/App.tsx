@@ -17,7 +17,9 @@ import {
   Settings,
   Database,
   User,
-  MessageSquare
+  MessageSquare,
+  Menu,
+  X
 } from 'lucide-react';
 import JsonFormatterPage from './pages/JsonFormatterPage';
 import DateConverterPage from './pages/DateConverterPage';
@@ -282,52 +284,132 @@ const compareJsonPreserving = (leftJson: string, rightJson: string): DiffResult 
   return { leftLines: resultLeft, rightLines: resultRight };
 };
 
-// --- LineRenderer Component ---
+// --- LineRenderer Component (VS Code Style) ---
 
 interface LineRendererProps {
   line: DiffLine;
   side: 'left' | 'right';
   isCollapsed: boolean;
   onToggleCollapse: (path: string) => void;
+  otherLine?: DiffLine; // For character-level diff highlighting
 }
 
-const LineRenderer: React.FC<LineRendererProps> = ({ line, side, isCollapsed, onToggleCollapse }) => {
+// Helper function to find character-level differences between two strings
+const getCharDiff = (left: string, right: string): { leftHighlight: [number, number][]; rightHighlight: [number, number][] } => {
+  const leftHighlight: [number, number][] = [];
+  const rightHighlight: [number, number][] = [];
+
+  // Find the value portion after the colon for JSON lines
+  const leftMatch = left.match(/^(\s*"[^"]+"\s*:\s*)/);
+  const rightMatch = right.match(/^(\s*"[^"]+"\s*:\s*)/);
+
+  if (leftMatch && rightMatch && leftMatch[0].length === rightMatch[0].length) {
+    // Keys match, highlight only the value portion
+    const prefixLen = leftMatch[0].length;
+    leftHighlight.push([prefixLen, left.length]);
+    rightHighlight.push([prefixLen, right.length]);
+  } else {
+    // Highlight the whole line
+    leftHighlight.push([0, left.length]);
+    rightHighlight.push([0, right.length]);
+  }
+
+  return { leftHighlight, rightHighlight };
+};
+
+// Helper to render content with character-level highlighting
+const renderHighlightedContent = (content: string, highlights: [number, number][], highlightClass: string) => {
+  if (highlights.length === 0) {
+    return <span>{content}</span>;
+  }
+
+  const result: React.ReactNode[] = [];
+  let lastEnd = 0;
+
+  highlights.forEach(([start, end], idx) => {
+    if (start > lastEnd) {
+      result.push(<span key={`text-${idx}`}>{content.slice(lastEnd, start)}</span>);
+    }
+    result.push(
+      <span key={`hl-${idx}`} className={highlightClass}>
+        {content.slice(start, end)}
+      </span>
+    );
+    lastEnd = end;
+  });
+
+  if (lastEnd < content.length) {
+    result.push(<span key="end">{content.slice(lastEnd)}</span>);
+  }
+
+  return <>{result}</>;
+};
+
+const LineRenderer: React.FC<LineRendererProps> = ({ line, side, isCollapsed, onToggleCollapse, otherLine }) => {
   const isEmpty = line.content === '';
 
-  let bgClass = '';
-  let textClass = 'text-slate-700';
+  // VS Code dark theme colors
+  let bgClass = 'bg-[#1e1e1e]';
+  let textClass = 'text-[#d4d4d4]';
+  let gutterColor = 'border-transparent';
+  const lineNumClass = 'text-[#858585]';
+  let highlights: [number, number][] = [];
+  let highlightClass = '';
 
   if (isEmpty) {
+    // Empty line placeholder (for alignment)
     return (
-      <div className="h-6 flex items-center px-2 hover:bg-slate-50 group">
-        <span className="w-10 mr-2 text-xs text-slate-300 text-right select-none block font-mono">{line.lineNum}</span>
-        <div className="flex-1 h-full bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzjwqhhAGFQBVQAQxJcFCAAztE07B553hAAAAABJRU5ErkJggg==')] opacity-10"></div>
+      <div className="h-6 flex items-center bg-[#1e1e1e] group">
+        <div className="w-1 h-full border-l-2 border-transparent flex-shrink-0"></div>
+        <span className="w-12 pr-3 text-xs text-[#858585] text-right select-none block font-mono flex-shrink-0">{line.lineNum}</span>
+        <div className="flex-1 h-full bg-[#2d2d2d] opacity-50"></div>
       </div>
     );
   }
 
-  // Only color based on change status - Red, Green, Yellow
+  // Color based on change status - VS Code style
   if (line.status === 'added') {
-    bgClass = side === 'right' ? 'bg-green-100' : '';
-    textClass = side === 'right' ? 'text-green-800' : 'text-slate-400';
+    if (side === 'right') {
+      bgClass = 'bg-[#1e3a1e]';
+      gutterColor = 'border-[#4d9f4d]';
+      textClass = 'text-[#d4d4d4]';
+    }
   } else if (line.status === 'removed') {
-    bgClass = side === 'left' ? 'bg-red-100' : '';
-    textClass = side === 'left' ? 'text-red-800' : 'text-slate-400';
+    if (side === 'left') {
+      bgClass = 'bg-[#3a1d1e]';
+      gutterColor = 'border-[#9f4d4d]';
+      textClass = 'text-[#d4d4d4]';
+    }
   } else if (line.status === 'modified') {
-    bgClass = 'bg-yellow-100';
-    textClass = 'text-yellow-800';
+    // Modified lines get character-level highlighting
+    bgClass = side === 'left' ? 'bg-[#3a2a1e]' : 'bg-[#1e3a2a]';
+    gutterColor = side === 'left' ? 'border-[#9f7f4d]' : 'border-[#4d9f7f]';
+
+    // Calculate character-level highlights
+    if (otherLine && otherLine.content) {
+      const diff = getCharDiff(line.content, otherLine.content);
+      highlights = side === 'left' ? diff.leftHighlight : diff.rightHighlight;
+      highlightClass = side === 'left' ? 'bg-[#5c3a1e] rounded-sm' : 'bg-[#1e5c3a] rounded-sm';
+    }
   }
 
   const showCollapseToggle = line.isCollapsible && line.path;
 
   return (
-    <div className={`h-6 flex items-center px-2 font-mono text-sm hover:brightness-95 transition-colors group ${bgClass} ${textClass}`}>
-      <span className="w-10 mr-2 text-xs text-slate-400 text-right select-none block font-mono group-hover:text-slate-500 flex-shrink-0">{line.lineNum}</span>
+    <div className={`h-6 flex items-center font-mono text-sm group ${bgClass}`}>
+      {/* Gutter indicator */}
+      <div className={`w-1 h-full border-l-2 ${gutterColor} flex-shrink-0`}></div>
 
+      {/* Line number */}
+      <span className={`w-12 pr-3 text-xs ${lineNumClass} text-right select-none block font-mono flex-shrink-0 group-hover:text-[#a0a0a0]`}>
+        {line.lineNum}
+      </span>
+
+      {/* Collapse toggle */}
       {showCollapseToggle && (
         <button
           onClick={() => line.path && onToggleCollapse(line.path)}
-          className="w-4 h-4 flex items-center justify-center mr-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0"
+          className="w-4 h-4 flex items-center justify-center mr-1 text-[#858585] hover:text-[#0078d4] hover:bg-[#2a2d2e] rounded transition-colors flex-shrink-0"
         >
           {isCollapsed ? (
             <ChevronRight size={12} />
@@ -337,13 +419,65 @@ const LineRenderer: React.FC<LineRendererProps> = ({ line, side, isCollapsed, on
         </button>
       )}
 
-      {/* Plain text - no syntax highlighting, only change-based coloring */}
-      <pre className="m-0 p-0 bg-transparent whitespace-pre overflow-visible">
-        <code>{line.content}</code>
+      {/* Content with optional character-level highlighting */}
+      <pre className={`m-0 p-0 bg-transparent whitespace-pre overflow-visible ${textClass}`}>
+        <code>
+          {highlights.length > 0
+            ? renderHighlightedContent(line.content, highlights, highlightClass)
+            : line.content
+          }
+        </code>
       </pre>
+
       {isCollapsed && showCollapseToggle && (
-        <span className="text-slate-400 ml-1">...</span>
+        <span className="text-[#858585] ml-1">...</span>
       )}
+    </div>
+  );
+};
+
+// --- Diff Minimap Component (VS Code style overview) ---
+interface DiffMinimapProps {
+  lines: DiffLine[];
+  totalHeight: number;
+  onScrollTo: (lineNum: number) => void;
+}
+
+const DiffMinimap: React.FC<DiffMinimapProps> = ({ lines, totalHeight, onScrollTo }) => {
+  const minimapHeight = Math.min(totalHeight, 400);
+  const lineHeight = lines.length > 0 ? minimapHeight / lines.length : 0;
+
+  return (
+    <div
+      className="w-3 bg-[#1e1e1e] border-l border-[#3c3c3c] flex-shrink-0 relative cursor-pointer hidden md:block"
+      style={{ height: minimapHeight }}
+    >
+      {lines.map((line, idx) => {
+        if (line.status === 'unchanged' || line.content === '') return null;
+
+        let color = 'transparent';
+        if (line.status === 'added') color = '#4d9f4d';
+        else if (line.status === 'removed') color = '#9f4d4d';
+        else if (line.status === 'modified') color = '#9f7f4d';
+
+        const top = idx * lineHeight;
+        const height = Math.max(lineHeight, 2);
+
+        return (
+          <div
+            key={idx}
+            className="absolute right-0 w-2 hover:w-3 transition-all cursor-pointer"
+            style={{
+              top: `${top}px`,
+              height: `${height}px`,
+              backgroundColor: color,
+              opacity: 0.8
+            }}
+            onClick={() => onScrollTo(line.lineNum)}
+            title={`Line ${line.lineNum}: ${line.status}`}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -506,35 +640,35 @@ function ComparePage({
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex-shrink-0 border-b border-slate-200 px-4 py-2 flex items-center justify-between bg-slate-50">
-        <div className="flex items-center gap-4">
+      <div className="flex-shrink-0 border-b border-slate-200 px-3 md:px-4 py-2 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
+        <div className="flex items-center gap-2 md:gap-4">
           {mode === 'compare' && stats && (
-            <div className="flex gap-3 text-sm font-medium">
-              <span className="flex items-center text-green-600 bg-green-50 px-2 py-1 rounded">
+            <div className="flex gap-2 md:gap-3 text-xs md:text-sm font-medium">
+              <span className="flex items-center text-green-600 bg-green-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded">
                 +{stats.added}
               </span>
-              <span className="flex items-center text-red-600 bg-red-50 px-2 py-1 rounded">
+              <span className="flex items-center text-red-600 bg-red-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded">
                 -{stats.removed}
               </span>
-              <span className="flex items-center text-amber-600 bg-amber-50 px-2 py-1 rounded">
+              <span className="flex items-center text-amber-600 bg-amber-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded">
                 ~{stats.modified}
               </span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           {mode === 'input' ? (
             <>
-              <button onClick={formatJson} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                <Code2 size={14} /> Prettify
+              <button onClick={formatJson} className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                <Code2 size={14} /> <span className="hidden sm:inline">Prettify</span>
               </button>
-              <button onClick={clearAll} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                <Trash2 size={14} /> Clear
+              <button onClick={clearAll} className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
               </button>
               <button
                 onClick={processDiff}
-                className="flex items-center gap-2 px-4 py-1.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded shadow-sm transition-all active:scale-95"
+                className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 text-xs md:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded shadow-sm transition-all active:scale-95"
               >
                 Compare <ChevronRight size={14} />
               </button>
@@ -549,7 +683,7 @@ function ComparePage({
               </button>
               <button
                 onClick={() => setMode('input')}
-                className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded shadow-sm transition-all"
+                className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 text-xs md:text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded shadow-sm transition-all"
               >
                 Edit
               </button>
@@ -567,16 +701,16 @@ function ComparePage({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {mode === 'input' ? (
-          <div className="flex-1 flex divide-x divide-slate-200 bg-white">
+          <div className="flex-1 flex flex-col md:flex-row md:divide-x divide-slate-200 bg-white">
             {/* Left Input with Line Numbers */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-[200px] md:min-h-0 border-b md:border-b-0 border-slate-200">
               <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Original</span>
               </div>
               <div className="flex-1 flex overflow-hidden">
-                <div className="flex-shrink-0 bg-slate-50 border-r border-slate-200 overflow-hidden select-none">
+                <div className="flex-shrink-0 bg-slate-50 border-r border-slate-200 overflow-hidden select-none hidden md:block">
                   <div className="pt-4 pb-4">
                     {jsonA.split('\n').map((_, idx) => (
                       <div key={idx} className="h-5 text-right pr-3 pl-2 text-xs text-slate-400 font-mono">
@@ -588,19 +722,19 @@ function ComparePage({
                 <textarea
                   value={jsonA}
                   onChange={(e) => setJsonA(e.target.value)}
-                  className="flex-1 p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none leading-5"
+                  className="flex-1 p-3 md:p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none leading-5"
                   spellCheck={false}
                   placeholder='{"key": "value"}'
                 />
               </div>
             </div>
             {/* Right Input with Line Numbers */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-[200px] md:min-h-0">
               <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Modified</span>
               </div>
               <div className="flex-1 flex overflow-hidden">
-                <div className="flex-shrink-0 bg-slate-50 border-r border-slate-200 overflow-hidden select-none">
+                <div className="flex-shrink-0 bg-slate-50 border-r border-slate-200 overflow-hidden select-none hidden md:block">
                   <div className="pt-4 pb-4">
                     {jsonB.split('\n').map((_, idx) => (
                       <div key={idx} className="h-5 text-right pr-3 pl-2 text-xs text-slate-400 font-mono">
@@ -612,7 +746,7 @@ function ComparePage({
                 <textarea
                   value={jsonB}
                   onChange={(e) => setJsonB(e.target.value)}
-                  className="flex-1 p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none leading-5"
+                  className="flex-1 p-3 md:p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none leading-5"
                   spellCheck={false}
                   placeholder='{"key": "new_value"}'
                 />
@@ -620,61 +754,94 @@ function ComparePage({
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col bg-white">
-            <div className="flex border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              <div className="w-1/2 p-2 px-4 border-r border-slate-200 flex items-center justify-between">
-                <span>Original</span>
+          <div className="flex-1 flex flex-col bg-[#1e1e1e]">
+            {/* VS Code style panel headers */}
+            <div className="flex flex-col md:flex-row border-b border-[#3c3c3c] bg-[#252526] text-xs font-medium text-[#cccccc]">
+              <div className="w-full md:w-1/2 p-2 px-4 border-b md:border-b-0 md:border-r border-[#3c3c3c] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileJson size={14} className="text-[#75beff]" />
+                  <span>Original</span>
+                </div>
                 <button
                   onClick={() => onOpenInFormat(jsonA)}
-                  className="text-[10px] px-2 py-0.5 text-blue-600 hover:bg-blue-100 rounded transition-colors normal-case font-medium"
+                  className="text-[10px] px-2 py-0.5 text-[#75beff] hover:bg-[#37373d] rounded transition-colors font-medium"
                 >
                   Open in Format →
                 </button>
               </div>
-              <div className="w-1/2 p-2 px-4 flex items-center justify-between">
-                <span>Modified</span>
+              <div className="w-full md:w-1/2 p-2 px-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileJson size={14} className="text-[#75beff]" />
+                  <span>Modified</span>
+                </div>
                 <button
                   onClick={() => onOpenInFormat(jsonB)}
-                  className="text-[10px] px-2 py-0.5 text-blue-600 hover:bg-blue-100 rounded transition-colors normal-case font-medium"
+                  className="text-[10px] px-2 py-0.5 text-[#75beff] hover:bg-[#37373d] rounded transition-colors font-medium"
                 >
                   Open in Format →
                 </button>
               </div>
             </div>
-            <div className="flex-1 flex overflow-hidden">
-              <div
-                ref={leftRef}
-                onScroll={() => handleScroll(leftRef, rightRef)}
-                className="w-1/2 overflow-auto border-r border-slate-200 bg-white"
-              >
-                <div className="min-w-fit">
-                  {filteredLines.leftLines.map((line, idx) => (
-                    <LineRenderer
-                      key={`L-${idx}`}
-                      line={line}
-                      side="left"
-                      isCollapsed={line.path ? collapsedPaths.has(line.path) : false}
-                      onToggleCollapse={togglePath}
-                    />
-                  ))}
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+              {/* Left panel with minimap */}
+              <div className="w-full md:w-1/2 flex border-b md:border-b-0 md:border-r border-[#3c3c3c]">
+                <div
+                  ref={leftRef}
+                  onScroll={() => handleScroll(leftRef, rightRef)}
+                  className="flex-1 overflow-auto bg-[#1e1e1e] min-h-[200px] md:min-h-0"
+                >
+                  <div className="min-w-fit">
+                    {filteredLines.leftLines.map((line, idx) => (
+                      <LineRenderer
+                        key={`L-${idx}`}
+                        line={line}
+                        side="left"
+                        isCollapsed={line.path ? collapsedPaths.has(line.path) : false}
+                        onToggleCollapse={togglePath}
+                        otherLine={line.status === 'modified' ? filteredLines.rightLines[idx] : undefined}
+                      />
+                    ))}
+                  </div>
                 </div>
+                <DiffMinimap
+                  lines={filteredLines.leftLines}
+                  totalHeight={filteredLines.leftLines.length * 24}
+                  onScrollTo={(lineNum) => {
+                    if (leftRef.current) {
+                      leftRef.current.scrollTop = (lineNum - 1) * 24;
+                    }
+                  }}
+                />
               </div>
-              <div
-                ref={rightRef}
-                onScroll={() => handleScroll(rightRef, leftRef)}
-                className="w-1/2 overflow-auto bg-white"
-              >
-                <div className="min-w-fit">
-                  {filteredLines.rightLines.map((line, idx) => (
-                    <LineRenderer
-                      key={`R-${idx}`}
-                      line={line}
-                      side="right"
-                      isCollapsed={line.path ? collapsedPaths.has(line.path) : false}
-                      onToggleCollapse={togglePath}
-                    />
-                  ))}
+              {/* Right panel with minimap */}
+              <div className="w-full md:w-1/2 flex">
+                <div
+                  ref={rightRef}
+                  onScroll={() => handleScroll(rightRef, leftRef)}
+                  className="flex-1 overflow-auto bg-[#1e1e1e] min-h-[200px] md:min-h-0"
+                >
+                  <div className="min-w-fit">
+                    {filteredLines.rightLines.map((line, idx) => (
+                      <LineRenderer
+                        key={`R-${idx}`}
+                        line={line}
+                        side="right"
+                        isCollapsed={line.path ? collapsedPaths.has(line.path) : false}
+                        onToggleCollapse={togglePath}
+                        otherLine={line.status === 'modified' ? filteredLines.leftLines[idx] : undefined}
+                      />
+                    ))}
+                  </div>
                 </div>
+                <DiffMinimap
+                  lines={filteredLines.rightLines}
+                  totalHeight={filteredLines.rightLines.length * 24}
+                  onScrollTo={(lineNum) => {
+                    if (rightRef.current) {
+                      rightRef.current.scrollTop = (lineNum - 1) * 24;
+                    }
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -700,6 +867,7 @@ export default function App() {
   const [compareMode, setCompareMode] = useState<'input' | 'compare'>('input');
   const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(new Set());
   const [formatterJson, setFormatterJson] = useState<string | undefined>(undefined);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // --- Refs ---
   const konamiIndex = useRef(0);
@@ -780,23 +948,23 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       {/* Header with Navigation */}
-      <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm z-10 sticky top-0">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
+      <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 flex items-center justify-between shadow-sm z-20 sticky top-0">
+        <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-3">
             <div
-              className="bg-blue-600 p-2 rounded-lg text-white cursor-pointer active:scale-95 transition-transform select-none"
+              className="bg-blue-600 p-1.5 md:p-2 rounded-lg text-white cursor-pointer active:scale-95 transition-transform select-none"
               onClick={handleLogoClick}
               title="Click me 5 times!"
             >
-              <FileJson size={20} />
+              <FileJson size={18} className="md:w-5 md:h-5" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight text-slate-900">DevKit</h1>
+              <h1 className="text-base md:text-lg font-bold tracking-tight text-slate-900">DevKit</h1>
             </div>
           </div>
 
-          {/* Page Tabs */}
-          <nav className="flex items-center gap-1 bg-slate-100 rounded-lg p-1 overflow-x-auto">
+          {/* Desktop Page Tabs - hidden on mobile */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100 rounded-lg p-1 overflow-x-auto">
             <button
               onClick={() => setCurrentPage('compare')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === 'compare'
@@ -899,7 +1067,47 @@ export default function App() {
             </button>
           </nav>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </header>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-[57px] bg-black/50 z-50" onClick={() => setMobileMenuOpen(false)}>
+          <nav className="bg-white border-b border-slate-200 shadow-lg max-h-[70vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {[
+              { id: 'compare' as AppPage, icon: ArrowRightLeft, label: 'Compare' },
+              { id: 'format' as AppPage, icon: Code2, label: 'Format' },
+              { id: 'date' as AppPage, icon: Calendar, label: 'Date' },
+              { id: 'base64' as AppPage, icon: Lock, label: 'Base64' },
+              { id: 'tools' as AppPage, icon: Wrench, label: 'Tools' },
+              { id: 'xml' as AppPage, icon: FileCode, label: 'XML' },
+              { id: 'yaml' as AppPage, icon: Settings, label: 'YAML' },
+              { id: 'mongo' as AppPage, icon: Database, label: 'Mongo' },
+              { id: 'feedback' as AppPage, icon: MessageSquare, label: 'Feedback' },
+              { id: 'about' as AppPage, icon: User, label: 'About' },
+            ].map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => { setCurrentPage(id); setMobileMenuOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left text-base font-medium border-b border-slate-100 transition-colors ${currentPage === id
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+              >
+                <Icon size={20} />
+                {label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {/* Page Content */}
       {currentPage === 'compare' && (

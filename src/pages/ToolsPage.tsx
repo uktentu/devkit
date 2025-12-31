@@ -108,23 +108,23 @@ function RegexTester() {
             </div>
 
             {/* Test String & Results */}
-            <div className="flex-1 flex overflow-hidden">
-                <div className="w-1/2 flex flex-col border-r border-slate-200">
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                <div className="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 min-h-[150px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Test String</span>
                     </div>
                     <textarea
                         value={testString}
                         onChange={(e) => setTestString(e.target.value)}
-                        className="flex-1 p-4 font-mono text-sm resize-none focus:outline-none"
+                        className="flex-1 p-3 md:p-4 font-mono text-sm resize-none focus:outline-none"
                         placeholder="Enter text to test against..."
                     />
                 </div>
-                <div className="w-1/2 flex flex-col">
+                <div className="w-full md:w-1/2 flex flex-col min-h-[150px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Highlighted Matches</span>
                     </div>
-                    <div className="flex-1 p-4 overflow-auto bg-slate-50">
+                    <div className="flex-1 p-3 md:p-4 overflow-auto bg-slate-50">
                         <div
                             className="font-mono text-sm whitespace-pre-wrap"
                             dangerouslySetInnerHTML={{ __html: highlightedText }}
@@ -310,27 +310,27 @@ console.log(hello);
     const renderedHtml = useMemo(() => renderMarkdown(markdown), [markdown]);
 
     return (
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             {/* Editor */}
-            <div className="w-1/2 flex flex-col border-r border-slate-200">
+            <div className="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 min-h-[200px] md:min-h-0">
                 <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Markdown</span>
                 </div>
                 <textarea
                     value={markdown}
                     onChange={(e) => setMarkdown(e.target.value)}
-                    className="flex-1 p-4 font-mono text-sm resize-none focus:outline-none"
+                    className="flex-1 p-3 md:p-4 font-mono text-sm resize-none focus:outline-none"
                     placeholder="Enter markdown..."
                 />
             </div>
 
             {/* Preview */}
-            <div className="w-1/2 flex flex-col">
+            <div className="w-full md:w-1/2 flex flex-col min-h-[200px] md:min-h-0">
                 <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Preview</span>
                 </div>
                 <div
-                    className="flex-1 p-4 overflow-auto prose prose-sm max-w-none markdown-preview-container"
+                    className="flex-1 p-3 md:p-4 overflow-auto prose prose-sm max-w-none markdown-preview-container"
                     dangerouslySetInnerHTML={{ __html: renderedHtml }}
                 />
                 <style>{`

@@ -264,16 +264,16 @@ export default function UnifiedFormatterPage() {
     return (
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
             {/* Toolbar */}
-            <div className="flex-shrink-0 border-b border-slate-200 px-4 py-2 flex items-center gap-4 bg-slate-50">
+            <div className="flex-shrink-0 border-b border-slate-200 px-4 md:px-6 py-2 flex flex-wrap items-center gap-2 md:gap-4 bg-slate-50">
                 {/* Format Type Selector */}
                 <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 p-1">
                     {formatTypes.map(type => (
                         <button
                             key={type.id}
                             onClick={() => setFormatType(type.id)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${formatType === type.id
-                                    ? 'bg-blue-600 text-white'
-                                    : 'text-slate-600 hover:bg-slate-100'
+                            className={`flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${formatType === type.id
+                                ? 'bg-blue-600 text-white'
+                                : 'text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             {type.icon}
@@ -282,19 +282,20 @@ export default function UnifiedFormatterPage() {
                     ))}
                 </div>
 
-                <div className="flex-1" />
+                <div className="flex-1 min-w-0" />
 
                 <button
                     onClick={loadSample}
-                    className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                    className="px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:bg-slate-100 rounded transition-colors"
                 >
-                    Load Sample
+                    <span className="hidden sm:inline">Load Sample</span>
+                    <span className="sm:hidden">Sample</span>
                 </button>
 
                 <button
                     onClick={applyFormatted}
                     disabled={!formatted.success}
-                    className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40"
+                    className="px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40"
                 >
                     Prettify
                 </button>
@@ -302,16 +303,19 @@ export default function UnifiedFormatterPage() {
                 <button
                     onClick={applyMinified}
                     disabled={!minified.success}
-                    className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded transition-colors disabled:opacity-40"
+                    className="px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:bg-slate-100 rounded transition-colors disabled:opacity-40"
+                    title="Minify"
                 >
-                    Minify
+                    <span className="hidden sm:inline">Minify</span>
+                    <span className="sm:hidden">-</span>
                 </button>
 
                 <button
                     onClick={() => setInput('')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    title="Clear"
                 >
-                    <Trash2 size={14} /> Clear
+                    <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
                 </button>
             </div>
 
@@ -324,9 +328,9 @@ export default function UnifiedFormatterPage() {
             )}
 
             {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Input Panel */}
-                <div className="w-1/2 flex flex-col border-r border-slate-200">
+                <div className="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 min-h-[200px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Input</span>
                         <span className="text-xs text-slate-400">{input.length} chars</span>
@@ -334,14 +338,14 @@ export default function UnifiedFormatterPage() {
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        className="flex-1 w-full p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
+                        className="flex-1 w-full p-3 md:p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
                         spellCheck={false}
                         placeholder={`Enter ${formatType.toUpperCase()} to format...`}
                     />
                 </div>
 
                 {/* Output Panel */}
-                <div className="w-1/2 flex flex-col">
+                <div className="w-full md:w-1/2 flex flex-col min-h-[200px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Formatted Output</span>
                         <button

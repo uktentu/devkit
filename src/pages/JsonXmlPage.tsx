@@ -264,99 +264,99 @@ export default function JsonXmlPage() {
     return (
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
             {/* Toolbar */}
-            <div className="flex-shrink-0 border-b border-slate-200 px-6 py-3 flex items-center gap-4 bg-slate-50">
+            <div className="flex-shrink-0 border-b border-slate-200 px-4 md:px-6 py-3 flex flex-wrap items-center gap-3 md:gap-4 bg-slate-50">
                 <div className="flex items-center gap-2">
                     <FileCode size={18} className="text-slate-500" />
-                    <span className="font-medium text-slate-700">JSON ↔ XML Converter</span>
+                    <span className="font-medium text-slate-700 text-sm md:text-base">JSON ↔ XML</span>
                 </div>
 
-                <div className="flex-1" />
+                <div className="flex-1 min-w-0" />
 
                 {/* Mode Toggle */}
                 <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 p-1">
                     <button
                         onClick={() => setMode('json-to-xml')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${mode === 'json-to-xml'
+                        className={`flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${mode === 'json-to-xml'
                             ? 'bg-blue-600 text-white'
                             : 'text-slate-600 hover:bg-slate-100'
                             }`}
                     >
-                        JSON → XML
+                        <span className="hidden sm:inline">JSON →</span> XML
                     </button>
                     <button
                         onClick={() => setMode('xml-to-json')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${mode === 'xml-to-json'
+                        className={`flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${mode === 'xml-to-json'
                             ? 'bg-blue-600 text-white'
                             : 'text-slate-600 hover:bg-slate-100'
                             }`}
                     >
-                        XML → JSON
+                        <span className="hidden sm:inline">XML →</span> JSON
                     </button>
                     <button
                         onClick={() => setMode('format-xml')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${mode === 'format-xml'
+                        className={`flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${mode === 'format-xml'
                             ? 'bg-blue-600 text-white'
                             : 'text-slate-600 hover:bg-slate-100'
                             }`}
                     >
-                        <Code2 size={14} /> Format XML
+                        <Code2 size={14} /> <span className="hidden sm:inline">Format</span>
                     </button>
                 </div>
 
                 <button
                     onClick={swapValues}
                     disabled={!result.success || !result.value || mode === 'format-xml'}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40"
+                    className="flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-40"
                 >
-                    <ArrowLeftRight size={14} /> Swap
+                    <ArrowLeftRight size={14} /> <span className="hidden sm:inline">Swap</span>
                 </button>
 
                 <button
                     onClick={clear}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    className="flex items-center gap-1 px-2 md:px-3 py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                 >
-                    <Trash2 size={14} /> Clear
+                    <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
                 </button>
             </div>
 
             {/* Samples */}
-            <div className="flex-shrink-0 border-b border-slate-100 px-6 py-2 bg-slate-50/50 flex items-center gap-2 text-xs">
-                <span className="text-slate-500">Load sample:</span>
+            <div className="flex-shrink-0 border-b border-slate-100 px-4 md:px-6 py-2 bg-slate-50/50 flex items-center gap-2 text-xs">
+                <span className="text-slate-500">Sample:</span>
                 <button onClick={loadSampleJson} className="text-blue-600 hover:underline">JSON</button>
                 <span className="text-slate-300">|</span>
                 <button onClick={loadSampleXml} className="text-blue-600 hover:underline">XML</button>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Input Panel */}
-                <div className="w-1/2 flex flex-col border-r border-slate-200">
+                <div className="w-full md:w-1/2 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 min-h-[150px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            {mode === 'json-to-xml' ? 'JSON Input' : mode === 'xml-to-json' ? 'XML Input' : 'XML Input'}
+                            {mode === 'json-to-xml' ? 'JSON' : 'XML'}
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-slate-400 hidden sm:inline">
                             {input.length} chars
                         </span>
                     </div>
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        className="flex-1 w-full p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
+                        className="flex-1 w-full p-3 md:p-4 font-mono text-sm bg-white border-0 resize-none text-slate-700 focus:outline-none"
                         spellCheck={false}
                         placeholder={mode === 'json-to-xml' ? 'Enter JSON...' : 'Enter XML...'}
                     />
                 </div>
 
                 {/* Output Panel */}
-                <div className="w-1/2 flex flex-col">
+                <div className="w-full md:w-1/2 flex flex-col min-h-[150px] md:min-h-0">
                     <div className="flex-shrink-0 px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            {mode === 'json-to-xml' ? 'XML Output' : mode === 'xml-to-json' ? 'JSON Output' : 'Formatted XML'}
+                            {mode === 'json-to-xml' ? 'XML' : mode === 'xml-to-json' ? 'JSON' : 'Formatted'}
                         </span>
                         <div className="flex items-center gap-2">
                             {result.success && (
-                                <span className="text-xs text-slate-400">
+                                <span className="text-xs text-slate-400 hidden sm:inline">
                                     {result.value.length} chars
                                 </span>
                             )}
@@ -373,7 +373,7 @@ export default function JsonXmlPage() {
 
                     {/* Output Content */}
                     {result.success ? (
-                        <div className="flex-1 overflow-auto p-4 bg-slate-50">
+                        <div className="flex-1 overflow-auto p-3 md:p-4 bg-slate-50">
                             {result.value ? (
                                 <pre className="font-mono text-sm whitespace-pre text-slate-700">
                                     {result.value}
